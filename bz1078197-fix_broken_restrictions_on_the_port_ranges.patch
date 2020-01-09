@@ -1,0 +1,24 @@
+diff -ur a/client/options.c b/client/options.c
+--- a/client/options.c	2015-03-03 13:49:47.793639102 -0500
++++ b/client/options.c	2015-03-03 13:49:33.873948003 -0500
+@@ -111,7 +111,7 @@
+ assign_port(fence_virt_args_t *args, struct arg_info *arg, char *value)
+ {
+ 	args->net.port = atoi(value);
+-	if (args->net.port <= 0 || args->net.port >= 65500) {
++	if (args->net.port <= 0 || args->net.port >= 65536) {
+ 		printf("Invalid port: '%s'\n", value);
+ 		args->flags |= F_ERR;
+ 	}
+diff -ur a/server/config.c b/server/config.c
+--- a/server/config.c	2015-03-03 13:49:47.783639324 -0500
++++ b/server/config.c	2015-03-03 13:49:21.386225135 -0500
+@@ -239,7 +239,7 @@
+ 		text_input("Multicast IP Port", val, inp, sizeof(inp));
+ 
+ 		done = atoi(inp);
+-		if (done <= 0 || done > 65534) {
++		if (done <= 0 || done >= 65536) {
+ 			printf("Port value '%s' is out of range\n", val);
+ 			continue;
+ 		}

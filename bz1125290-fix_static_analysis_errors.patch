@@ -1,0 +1,138 @@
+From f7ccaa261a83505118b735067846f17bde12430c Mon Sep 17 00:00:00 2001
+From: Lon Hohberger <lon@users.sourceforge.net>
+Date: Tue, 20 Sep 2011 11:40:39 -0400
+Subject: [PATCH] Fix static analysis errors
+
+Signed-off-by: Lon Hohberger <lon@users.sourceforge.net>
+---
+ client/mcast.c        | 1 +
+ client/serial.c       | 1 +
+ common/mcast.c        | 7 +++++--
+ common/simple_auth.c  | 4 ++++
+ server/daemon_init.c  | 3 +--
+ server/virt-sockets.c | 9 +++++----
+ 6 files changed, 17 insertions(+), 8 deletions(-)
+
+diff --git a/client/mcast.c b/client/mcast.c
+index 1400bfe..c416215 100644
+--- a/client/mcast.c
++++ b/client/mcast.c
+@@ -282,6 +282,7 @@ mcast_fence_virt(fence_virt_args_t *args)
+ 			       "authentication\n", args->net.key_file);
+ 			args->net.auth = AUTH_NONE;
+ 			args->net.hash = HASH_NONE;
++			key_len = 0;
+ 		}
+ 	}
+ 
+diff --git a/client/serial.c b/client/serial.c
+index 9312048..f686ab8 100644
+--- a/client/serial.c
++++ b/client/serial.c
+@@ -252,6 +252,7 @@ serial_fence_virt(fence_virt_args_t *args)
+ 			perror("vmchannel connect");
+ 			printf("Failed to connect to %s:%d\n", args->serial.address,
+ 			       args->net.port);
++			return -1;
+ 		}
+ 	}
+ 
+diff --git a/common/mcast.c b/common/mcast.c
+index 524d97c..b72f4f4 100644
+--- a/common/mcast.c
++++ b/common/mcast.c
+@@ -70,7 +70,6 @@ ipv4_recv_sk(char *addr, int port, unsigned int ifindex)
+ 	sock = socket(PF_INET, SOCK_DGRAM, 0);
+ 	if (sock < 0) {
+ 		printf("socket: %s\n", strerror(errno));
+-		close(sock);
+ 		sock = -1;
+ 		return 1;
+ 	}
+@@ -131,6 +130,9 @@ ipv4_send_sk(char *send_addr, char *addr, int port, struct sockaddr *tgt,
+ 		return -1;
+ 	}
+ 
++	memset(&mcast, 0, sizeof(mcast));
++	memset(&src, 0, sizeof(src));
++
+ 	/* Store multicast address */
+ 	mcast.sin_family = PF_INET;
+ 	mcast.sin_port = htons(port);
+@@ -235,7 +237,6 @@ ipv6_recv_sk(char *addr, int port, unsigned int ifindex)
+ 	sock = socket(PF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+ 	if (sock < 0) {
+ 		printf("socket: %s\n", strerror(errno));
+-		close(sock);
+ 		sock = -1;
+ 		return 1;
+ 	}
+@@ -299,6 +300,8 @@ ipv6_send_sk(char *send_addr, char *addr, int port, struct sockaddr *tgt,
+ 		return -1;
+ 	}
+ 
++	memset(&mcast, 0, sizeof(mcast));
++	memset(&src, 0, sizeof(src));
+ 	memset(&mreq, 0, sizeof(mreq));
+ 
+ 	/* Store multicast address */
+diff --git a/common/simple_auth.c b/common/simple_auth.c
+index b94e115..96644f3 100644
+--- a/common/simple_auth.c
++++ b/common/simple_auth.c
+@@ -202,6 +202,10 @@ sha_challenge(int fd, fence_auth_type_t auth, void *key,
+ 	unsigned int rlen;
+ 
+ 	devrand = open("/dev/urandom", O_RDONLY);
++	if (devrand < 0) {
++		perror("open /dev/urandom");
++		return 0;
++	}
+ 	if (read(devrand, challenge, sizeof(challenge)) < 0) {
+ 		perror("read /dev/urandom");
+ 		return 0;
+diff --git a/server/daemon_init.c b/server/daemon_init.c
+index 2769379..4a5f93f 100644
+--- a/server/daemon_init.c
++++ b/server/daemon_init.c
+@@ -55,7 +55,6 @@ check_pid_valid(pid_t pid, const char *prog)
+ 
+ 	snprintf(dirpath, sizeof (dirpath), "/proc/%d", pid);
+ 	if ((dir = opendir(dirpath)) == NULL) {
+-		closedir(dir);
+ 		return 0;	/* Pid has gone away. */
+ 	}
+ 	closedir(dir);
+@@ -91,7 +90,7 @@ check_pid_valid(pid_t pid, const char *prog)
+ 	/*
+ 	 * Check to see if this is the same executable.
+ 	 */
+-	if ((s = strstr(proc_cmdline, prog)) == NULL) {
++	if (strstr(proc_cmdline, prog) == NULL) {
+ 		return 0;
+ 	} else {
+ 		return 1;
+diff --git a/server/virt-sockets.c b/server/virt-sockets.c
+index 4d2909a..62bf672 100644
+--- a/server/virt-sockets.c
++++ b/server/virt-sockets.c
+@@ -130,11 +130,12 @@ domain_sock_setup(const char *domain, const char *socket_path)
+ 	return 0;
+ 
+ out_fail:
+-	if (node)
++	if (node) {
+ 		free(node->domain_name);
+-	if (node)
+-		free(node->socket_path);
+-	free(node);
++		if (node->socket_path)
++			free(node->socket_path);
++		free(node);
++	}
+ 	free(sun);
+ 	if (sock >= 0)
+ 		close(sock);
+-- 
+2.1.0
+

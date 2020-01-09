@@ -1,6 +1,6 @@
 Name:		fence-virt
 Version:	0.2.3
-Release:	18%{?dist}
+Release:	19%{?dist}
 Summary:	A pluggable fencing framework for virtual machines
 Group:		System Environment/Base
 License:	GPLv2+
@@ -38,6 +38,9 @@ Patch17: bz903172-fix_for_missed_libvirtd_events.patch
 Patch18: bz1014238-clarify_the_path_option_in_serial_mode.patch
 Patch19: bz1104740-send_complete_hostlist_info.patch
 Patch20: bz914144-allow_multiple_hypervisors_for_the_libvirt.patch
+Patch21: bz1020992-fence_xvm_print_status_when_invoked_with_o.patch
+Patch22: bz1078197-fix_broken_restrictions_on_the_port_ranges.patch
+Patch23: bz1125290-fix_static_analysis_errors.patch
 
 
 %description
@@ -122,6 +125,9 @@ about whether a virtual machine is running.
 %patch18 -p1 -b .bz1014238.1
 %patch19 -p1 -b .bz1104740.1
 %patch20 -p1 -b .bz914144.1
+%patch21 -p1 -b .bz1020992.1
+%patch22 -p1 -b .bz1078197.1
+%patch23 -p1 -b .bz1125290.1
 
 %build
 ./autogen.sh
@@ -177,6 +183,14 @@ rm -rf %{buildroot}
 %{_libdir}/%{name}/checkpoint.so
 
 %changelog
+* Tue Mar 03 2015 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-19
+- fence_virt/fence_xvm: Print status when invoked with -o
+  Resolves: rhbz#1020992
+- fence-virt: Fix broken restrictions on the port ranges
+  Resolves: rhbz#1078197
+- Fix static analysis errors
+  Resolves: rhbz#1125290
+
 * Mon Jun 30 2014 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-18
 - fence-virtd: Allow multiple hypervisors for the libvirt
   Resolves: rhbz#914144

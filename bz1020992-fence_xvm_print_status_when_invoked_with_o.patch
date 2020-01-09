@@ -1,0 +1,38 @@
+From bf3a1ec00a0f8c25d67a1675f5e4e1bd0e7daabd Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Sun, 3 Nov 2013 12:44:49 -0500
+Subject: [PATCH] fence_virt/fence_xvm: Print status when invoked with -o
+ status
+
+Previously no status was printed to stdout when fence_virt and fence_xvm
+were invoked with the -o status flag. The exit code of the program was
+the only way to determine the result of the status operation. This
+patch causes fence_virt and fence_xvm to additionally print
+either "Status: ON" or "Status: OFF" when it is able to determine
+the status.
+
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ client/main.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/client/main.c b/client/main.c
+index 3c72d08..7be4a8e 100644
+--- a/client/main.c
++++ b/client/main.c
+@@ -138,7 +138,12 @@ main(int argc, char **argv)
+ 
+ 	switch(ret) {
+ 	case RESP_OFF:
++		if (args.op == FENCE_STATUS)
++			printf("Status: OFF\n");
++		break;
+ 	case 0:
++		if (args.op == FENCE_STATUS)
++			printf("Status: ON\n");
+ 		break;
+ 	case RESP_FAIL:
+ 		printf("Operation failed\n");
+-- 
+2.1.0
+
