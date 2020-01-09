@@ -1,6 +1,6 @@
 Name:		fence-virt
 Version:	0.2.3
-Release:	13%{?dist}
+Release:	15%{?dist}
 Summary:	A pluggable fencing framework for virtual machines
 Group:		System Environment/Base
 License:	GPLv2+
@@ -33,6 +33,8 @@ Patch12: bz823542.patch
 Patch13: bz761228-fix_typo_in_fence_virt_8_man_page.patch
 Patch14: bz823542-explicitly_set_delay_to_0.patch
 Patch15: bz853927-return_success_if_a_domain_exists_but_is.patch
+Patch16: bz883588.patch
+Patch17: bz903172-fix_for_missed_libvirtd_events.patch
 
 
 %description
@@ -112,6 +114,8 @@ about whether a virtual machine is running.
 %patch13 -p1 -b .bz761228.1
 %patch14 -p1 -b .bz823542.1
 %patch15 -p1 -b .bz853927.1
+%patch16 -p1 -b .bz883588.1
+%patch17 -p1 -b .bz903172.1
 
 %build
 ./autogen.sh
@@ -167,6 +171,14 @@ rm -rf %{buildroot}
 %{_libdir}/%{name}/checkpoint.so
 
 %changelog
+* Fri Sep 13 2013 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-15
+- fence-virt: Fix for missed libvirtd events
+  Resolves: rhbz#903172
+
+* Tue Jul 16 2013 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-14
+- Install manual pages with file permission mode 644 instead of 755
+  Resolves rhbz#883588
+ 
 * Fri Oct 26 2012 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-13
 - Return success if a domain exists but is off
   Resolves: rhbz#853927

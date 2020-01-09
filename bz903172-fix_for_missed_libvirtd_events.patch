@@ -1,0 +1,57 @@
+diff -ur a/server/serial.c b/server/serial.c
+--- a/server/serial.c
++++ b/server/serial.c
+@@ -265,7 +265,9 @@
+ 
+ 	n = select(max+1, &rfds, NULL, NULL, timeout);
+ 	if (n < 0) {
+-		perror("select");
++		if (errno == ETIMEDOUT || errno == EINTR || errno == EAGAIN)
++			return 0;
++		dbg_printf(2, "select: %s\n", strerror(errno));
+ 		return n;
+ 	}
+ 
+@@ -284,7 +286,7 @@
+ 			ret = _read_retry(x, &data, sizeof(data), &tv);
+ 
+ 			if (ret != sizeof(data)) {
+-				if (--n)
++				if (--n > 0)
+ 					continue;
+ 				else
+ 					return 0;
+diff -ur a/server/virt-serial.c b/server/virt-serial.c
+--- a/server/virt-serial.c
++++ b/server/virt-serial.c
+@@ -430,8 +430,9 @@
+ 		dbg_printf(3," * URI: %s\n", args->uri);
+ 	if (args->path)
+ 		dbg_printf(3," * Socket path: %s\n", args->path);
+-	dbg_printf(3," * Mode: %s\n", args->mode?"VMChannel":"Serial");
++	dbg_printf(3," * Mode: %s\n", args->mode ? "VMChannel" : "Serial");
+ 
++top:
+ 	virEventRegisterImpl(myEventAddHandleFunc,
+ 			     myEventUpdateHandleFunc,
+ 			     myEventRemoveHandleFunc,
+@@ -493,13 +494,16 @@
+ 
+ 			if (pfd.revents & POLLHUP) {
+ 				DEBUG0("Reset by peer");
+-				goto out;
++				virConnectDomainEventDeregister(dconn, myDomainEventCallback1);
++				if (dconn && virConnectClose(dconn) < 0)
++					dbg_printf(1, "error closing libvirt connection\n");
++				DEBUG0("Attempting to reinitialize libvirt connection");
++				goto top;
+ 			}
+ 
+ 			if (h_cb) {
+ 				h_cb(0, h_fd,
+-				     myPollEventToEventHandleType(pfd.revents &
+-								  h_event),
++				     myPollEventToEventHandleType(pfd.revents & h_event),
+ 				     h_opaque);
+ 			}
+ 		}

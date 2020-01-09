@@ -1,0 +1,17 @@
+diff -ur a/man/Makefile.in b/man/Makefile.in
+--- a/man/Makefile.in	2010-01-12 18:44:12.000000000 -0500
++++ b/man/Makefile.in	2013-07-16 13:43:53.719002455 -0400
+@@ -21,11 +21,11 @@
+ 	if [ ! -d ${DESTDIR}/${mandir}/man8 ]; then \
+ 		install -d ${DESTDIR}/${mandir}/man8 ; \
+ 	fi
+-	install -m755 ${MAN8} ${DESTDIR}/${mandir}/man8
++	install -m644 ${MAN8} ${DESTDIR}/${mandir}/man8
+ 	if [ ! -d ${DESTDIR}/${mandir}/man5 ]; then \
+ 		install -d ${DESTDIR}/${mandir}/man5 ; \
+ 	fi
+-	install -m755 ${MAN5} ${DESTDIR}/${mandir}/man5
++	install -m644 ${MAN5} ${DESTDIR}/${mandir}/man5
+ 
+ 
+ clean:
