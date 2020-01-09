@@ -1,6 +1,6 @@
 Name:		fence-virt
 Version:	0.2.3
-Release:	15%{?dist}
+Release:	18%{?dist}
 Summary:	A pluggable fencing framework for virtual machines
 Group:		System Environment/Base
 License:	GPLv2+
@@ -35,6 +35,9 @@ Patch14: bz823542-explicitly_set_delay_to_0.patch
 Patch15: bz853927-return_success_if_a_domain_exists_but_is.patch
 Patch16: bz883588.patch
 Patch17: bz903172-fix_for_missed_libvirtd_events.patch
+Patch18: bz1014238-clarify_the_path_option_in_serial_mode.patch
+Patch19: bz1104740-send_complete_hostlist_info.patch
+Patch20: bz914144-allow_multiple_hypervisors_for_the_libvirt.patch
 
 
 %description
@@ -116,6 +119,9 @@ about whether a virtual machine is running.
 %patch15 -p1 -b .bz853927.1
 %patch16 -p1 -b .bz883588.1
 %patch17 -p1 -b .bz903172.1
+%patch18 -p1 -b .bz1014238.1
+%patch19 -p1 -b .bz1104740.1
+%patch20 -p1 -b .bz914144.1
 
 %build
 ./autogen.sh
@@ -171,6 +177,18 @@ rm -rf %{buildroot}
 %{_libdir}/%{name}/checkpoint.so
 
 %changelog
+* Mon Jun 30 2014 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-18
+- fence-virtd: Allow multiple hypervisors for the libvirt
+  Resolves: rhbz#914144
+
+* Sun Jun 22 2014 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-17
+- fence-virt: Send complete hostlist info
+  Resolves: rhbz#1104740
+
+* Sun Jun 22 2014 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-16
+- fence-virt: Clarify the path option in serial mode
+  Resolves: rhbz#1014238
+
 * Fri Sep 13 2013 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-15
 - fence-virt: Fix for missed libvirtd events
   Resolves: rhbz#903172

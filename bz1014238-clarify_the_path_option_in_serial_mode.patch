@@ -1,0 +1,34 @@
+From e66c25ba8cd22fc957cd2b4b76a52cd8667bae2c Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Sun, 22 Jun 2014 22:00:33 -0400
+Subject: [PATCH] fence-virt: Clarify the path option in serial mode
+
+Add a clarification for the path option when in serial mode.
+
+Clarified text from Chris Mackowski <cmackows@redhat.com>
+
+Resolves: rhbz#1014238
+
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ man/fence_virt.conf.5 | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/man/fence_virt.conf.5 b/man/fence_virt.conf.5
+index 364233c..412e769 100644
+--- a/man/fence_virt.conf.5
++++ b/man/fence_virt.conf.5
+@@ -145,9 +145,7 @@ the URI to use when connecting to libvirt by the serial plugin.
+ .TP
+ .B path
+ .
+-Sockets must reside in this directory in order to be considered
+-valid.  This can be used to prevent fence_virtd from using the wrong
+-sockets.
++The same directory that is defined for the domain serial port path (From example above: /sandbox/guests). Sockets must reside in this directory in order to be considered valid. This can be used to prevent fence_virtd from using the wrong sockets.
+ 
+ .TP
+ .B mode
+-- 
+1.9.3
+
