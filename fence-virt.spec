@@ -1,6 +1,6 @@
 Name:		fence-virt
 Version:	0.2.3
-Release:	19%{?dist}
+Release:	24%{?dist}
 Summary:	A pluggable fencing framework for virtual machines
 Group:		System Environment/Base
 License:	GPLv2+
@@ -41,6 +41,12 @@ Patch20: bz914144-allow_multiple_hypervisors_for_the_libvirt.patch
 Patch21: bz1020992-fence_xvm_print_status_when_invoked_with_o.patch
 Patch22: bz1078197-fix_broken_restrictions_on_the_port_ranges.patch
 Patch23: bz1125290-fix_static_analysis_errors.patch
+Patch24: bz1204873-client_fix_delay_parameter_checking_copy_paste.patch
+Patch25: bz908455-add_list_status_operation_for_compat_with_other.patch
+Patch26: bz1010346-log_status_error_to_syslog_also.patch
+Patch27: bz1204873-permit_explicitly_setting_delay_to_0.patch
+Patch28: bz908455-add_list_status_command_to_man_page_and_metadata.patch
+Patch29: bz1204873-remove_delay_from_the_status,_monitor_and_list.patch
 
 
 %description
@@ -128,6 +134,12 @@ about whether a virtual machine is running.
 %patch21 -p1 -b .bz1020992.1
 %patch22 -p1 -b .bz1078197.1
 %patch23 -p1 -b .bz1125290.1
+%patch24 -p1 -b .bz1204873.1
+%patch25 -p1 -b .bz908455.1
+%patch26 -p1 -b .bz1010346.1
+%patch27 -p1 -b .bz1204873.1
+%patch28 -p1 -b .bz908455.1
+%patch29 -p1 -b .bz1204873.1
 
 %build
 ./autogen.sh
@@ -183,6 +195,28 @@ rm -rf %{buildroot}
 %{_libdir}/%{name}/checkpoint.so
 
 %changelog
+* Wed Jan 04 2017 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-24
+- fence-virt: Add list-status command to man page and metadata
+  Resolves: rhbz#908455
+- Remove delay from the status, monitor and list
+  Resolves: rhbz#1204873
+
+* Fri Nov 11 2016 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-23
+- fence-virt: Permit explicitly setting delay to 0
+  Resolves: rhbz#1204873
+
+* Tue Nov 08 2016 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-22
+- fence-virt: Log client status and errors to syslog
+  Resolves: rhbz#1010346
+
+* Tue Nov 01 2016 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-21
+- fence-virt: Add 'list-status' operation for compat with other
+  Resolves: rhbz#908455
+
+* Tue Nov 01 2016 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-20
+- client: fix "delay" parameter checking (copy-paste)
+  Resolves: rhbz#1204873
+
 * Tue Mar 03 2015 Ryan McCabe <rmccabe@redhat.com> - 0.2.3-19
 - fence_virt/fence_xvm: Print status when invoked with -o
   Resolves: rhbz#1020992

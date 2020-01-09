@@ -1,0 +1,31 @@
+From edb5ee817a143d059ff264f061b8bcf72e303861 Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Tue, 1 Nov 2016 12:11:22 -0400
+Subject: [PATCH] fence-virt: Add 'list-status' operation for compat with other
+ agents
+
+Add a list-status operation that behaves the same way as the list operation
+for compatibility with the other fence agents.
+
+Resolves: rhbz#908455
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ client/options.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/client/options.c b/client/options.c
+index a20e09f..51650d3 100644
+--- a/client/options.c
++++ b/client/options.c
+@@ -243,7 +243,7 @@ assign_op(fence_virt_args_t *args, struct arg_info *arg, char *value)
+ 		args->op = FENCE_STATUS;
+ 	} else if (!strcasecmp(value, "monitor")) {
+ 		args->op = FENCE_DEVSTATUS;
+-	} else if (!strcasecmp(value, "list")) {
++	} else if (!strcasecmp(value, "list") || !strcasecmp(value, "list-status")) {
+ 		args->op = FENCE_HOSTLIST;
+ 	} else if (!strcasecmp(value, "metadata")) {
+ 		args->op = FENCE_METADATA;
+-- 
+2.5.5
+

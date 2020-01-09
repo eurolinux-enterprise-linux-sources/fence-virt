@@ -1,0 +1,51 @@
+From 65604b0b8f4c5471993292484f4a5f9b0a1bb504 Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Wed, 4 Jan 2017 16:43:32 -0500
+Subject: [PATCH] fence-virt: Add list-status command to man page and metadata
+
+Add the list-status command to the man page and the metadata output.
+
+Resolves: rhbz#908455
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ client/options.c | 1 +
+ man/fence_virt.8 | 4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/client/options.c b/client/options.c
+index 05f8dcf..5415c34 100644
+--- a/client/options.c
++++ b/client/options.c
+@@ -784,6 +784,7 @@ args_metadata(char *progname, const char *optstr)
+ 	printf("\t<action name=\"status\" />\n");	
+ 	printf("\t<action name=\"monitor\" />\n");	
+ 	printf("\t<action name=\"list\" />\n");	
++	printf("\t<action name=\"list-status\" />\n");	
+ 	printf("</actions>\n");
+ 	printf("</resource-agent>\n");
+ }
+diff --git a/man/fence_virt.8 b/man/fence_virt.8
+index 14406ce..1aded48 100644
+--- a/man/fence_virt.8
++++ b/man/fence_virt.8
+@@ -37,7 +37,7 @@ Virtual machine (domain UUID or name) to fence
+ .TP
+ .B -o
+ . 
+-Fencing action (null, off, on, reboot, status, monitor, list, or metadata) (Default Value: reboot).  See the FENCING ACTIONS section.
++Fencing action (null, off, on, reboot, status, monitor, list, list-status, or metadata) (Default Value: reboot).  See the FENCING ACTIONS section.
+ 
+ .TP
+ .B -t
+@@ -250,7 +250,7 @@ Check whether a virtual machine is running or not.
+ Check the health of fence_virtd's backend plugin.
+ 
+ .TP
+-\fBlist \fP
++\fBlist\fP and \fBlist-status\fP
+ List virtual machines which may be fenced by fence_virtd (not supported
+ on all backends).
+ 
+-- 
+2.5.5
+

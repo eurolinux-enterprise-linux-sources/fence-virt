@@ -1,0 +1,31 @@
+From d4cd306cb464c12b9d35b062e3de1657c83ef4e0 Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Fri, 11 Nov 2016 09:52:18 -0500
+Subject: [PATCH] fence-virt: Permit explicitly setting delay to 0
+
+Permit explicitly setting the delay to 0. The fix in
+commit 44deba6ee915e9c7079f244b70900b56bdec86d8 for a typo caused a change
+in behavior that resulted in an explicitly specified delay of 0 causing an
+error.
+
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ client/options.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/client/options.c b/client/options.c
+index 51650d3..05f8dcf 100644
+--- a/client/options.c
++++ b/client/options.c
+@@ -336,7 +336,7 @@ assign_delay(fence_virt_args_t *args, struct arg_info *arg, char *value)
+ 		return;
+ 
+ 	args->delay = atoi(value);
+-	if (args->delay <= 0) {
++	if (args->delay < 0) {
+ 		printf("Invalid delay: '%s'\n", value);
+ 		args->flags |= F_ERR;
+ 	}
+-- 
+2.5.5
+
