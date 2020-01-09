@@ -1,0 +1,126 @@
+From 0de5dd3ac988386085c2cb600e8d122974ab3981 Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Fri, 26 Oct 2012 18:14:45 -0400
+Subject: [PATCH] fence_virtd: Return success if a domain exists but is
+ already off.
+
+Return success if a domain exists but is already off.
+
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ server/checkpoint.c | 27 +++++++++++++++++----------
+ server/libvirt.c    | 28 ++++++++++++++++++----------
+ 2 files changed, 35 insertions(+), 20 deletions(-)
+
+diff --git a/server/checkpoint.c b/server/checkpoint.c
+index 3ac7e6b..edf7728 100644
+--- a/server/checkpoint.c
++++ b/server/checkpoint.c
+@@ -386,16 +386,18 @@ do_off(const char *vm_name)
+ 		vdp = virDomainLookupByName(vp, vm_name);
+ 	}
+ 
+-	if (!vdp ||
+-	    ((virDomainGetInfo(vdp, &vdi) == 0) &&
+-	     (vdi.state == VIR_DOMAIN_SHUTOFF))) {
++	if (!vdp) {
+ 		dbg_printf(2, "Nothing to do - domain does not exist\n");
+-
+-		if (vdp)
+-			virDomainFree(vdp);
+ 		return 1;
+ 	}
+ 
++	if (((virDomainGetInfo(vdp, &vdi) == 0) &&
++	     (vdi.state == VIR_DOMAIN_SHUTOFF))) {
++		dbg_printf(2, "Nothing to do - domain is off\n");
++		virDomainFree(vdp);
++		return 0;
++	}
++
+ 	syslog(LOG_NOTICE, "Destroying domain %s\n", vm_name);
+ 	dbg_printf(2, "[OFF] Calling virDomainDestroy\n");
+ 	ret = virDomainDestroy(vdp);
+@@ -446,15 +448,20 @@ do_reboot(const char *vm_name)
+ 		vdp = virDomainLookupByName(vp, vm_name);
+ 	}
+ 
+-	if (!vdp || ((virDomainGetInfo(vdp, &vdi) == 0) &&
+-	     (vdi.state == VIR_DOMAIN_SHUTOFF))) {
++	if (!vdp) {
+ 		dbg_printf(2, "[libvirt:REBOOT] Nothing to "
+ 			   "do - domain does not exist\n");
+-		if (vdp)
+-			virDomainFree(vdp);
+ 		return 1;
+ 	}
+ 
++	if (((virDomainGetInfo(vdp, &vdi) == 0) &&
++	     (vdi.state == VIR_DOMAIN_SHUTOFF))) {
++		dbg_printf(2, "[libvirt:REBOOT] Nothing to "
++			   "do - domain is off\n");
++		virDomainFree(vdp);
++		return 0;
++	}
++
+ 	syslog(LOG_NOTICE, "Rebooting domain %s\n", vm_name);
+ 	printf("Rebooting domain %s...\n", vm_name);
+ 	domain_desc = virDomainGetXMLDesc(vdp, 0);
+diff --git a/server/libvirt.c b/server/libvirt.c
+index 12bb8ad..1d1473b 100644
+--- a/server/libvirt.c
++++ b/server/libvirt.c
+@@ -171,16 +171,18 @@ libvirt_off(const char *vm_name, const char *src,
+ 		vdp = virDomainLookupByName(info->vp, vm_name);
+ 	}
+ 
+-	if (!vdp ||
+-	    ((virDomainGetInfo(vdp, &vdi) == 0) &&
+-	     (vdi.state == VIR_DOMAIN_SHUTOFF))) {
++	if (!vdp) {
+ 		dbg_printf(2, "Nothing to do - domain does not exist\n");
+-
+-		if (vdp)
+-			virDomainFree(vdp);
+ 		return 1;
+ 	}
+ 
++	if (((virDomainGetInfo(vdp, &vdi) == 0) &&
++	     (vdi.state == VIR_DOMAIN_SHUTOFF))) {
++		dbg_printf(2, "Nothing to do - domain is off\n");
++		virDomainFree(vdp);
++		return 0;
++	}
++
+ 	syslog(LOG_NOTICE, "Destroying domain %s\n", vm_name);
+ 	dbg_printf(2, "[OFF] Calling virDomainDestroy\n");
+ 	ret = virDomainDestroy(vdp);
+@@ -314,15 +316,21 @@ libvirt_reboot(const char *vm_name, const char *src,
+ 		vdp = virDomainLookupByName(info->vp, vm_name);
+ 	}
+ 
+-	if (!vdp || ((virDomainGetInfo(vdp, &vdi) == 0) &&
+-	     (vdi.state == VIR_DOMAIN_SHUTOFF))) {
++	if (!vdp) {
+ 		dbg_printf(2, "[libvirt:REBOOT] Nothing to "
+ 			   "do - domain does not exist\n");
+-		if (vdp)
+-			virDomainFree(vdp);
+ 		return 1;
+ 	}
+ 
++	if (((virDomainGetInfo(vdp, &vdi) == 0) &&
++	     (vdi.state == VIR_DOMAIN_SHUTOFF))) {
++			dbg_printf(2, "[libvirt:REBOOT] Nothing to "
++				   "do - domain is off\n");
++		virDomainFree(vdp);
++		return 0;
++	}
++
++
+ 	syslog(LOG_NOTICE, "Rebooting domain %s\n", vm_name);
+ 	printf("Rebooting domain %s...\n", vm_name);
+ 	domain_desc = virDomainGetXMLDesc(vdp, 0);
+-- 
+1.7.11.7
+

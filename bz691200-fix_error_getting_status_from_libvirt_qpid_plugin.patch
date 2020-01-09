@@ -1,0 +1,36 @@
+From e4658c1ae237dd8b0987ce0060d2a996a8990f49 Mon Sep 17 00:00:00 2001
+From: Zane Bitter <zbitter@redhat.com>
+Date: Mon, 1 Aug 2011 18:36:18 +0200
+Subject: [PATCH] Fix error getting status from libvirt-qpid plugin
+
+Signed-off-by: Zane Bitter <zbitter@redhat.com>
+Signed-off-by: Lon Hohberger <lon@users.sourceforge.net>
+---
+ server/libvirt-qpid.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/server/libvirt-qpid.cpp b/server/libvirt-qpid.cpp
+index 593f47c..4a3dc17 100644
+--- a/server/libvirt-qpid.cpp
++++ b/server/libvirt-qpid.cpp
+@@ -170,7 +170,7 @@ do_lq_request(struct lq_info *info, const char *vm_name,
+ 		i = 0;
+ 	}
+ 
+-	if (!strcasecmp(action, "status")) {
++	if (!strcasecmp(action, "state")) {
+ 		result.code = i;
+ 		goto out;
+ 	}
+@@ -246,7 +246,7 @@ lq_status(const char *vm_name, void *priv)
+ 	VALIDATE(priv);
+ 	printf("[libvirt-qpid] STATUS operation on %s\n", vm_name);
+ 
+-	return do_lq_request((lq_info *)priv, vm_name, "destroy");
++	return do_lq_request((lq_info *)priv, vm_name, "state");
+ }
+ 
+ 
+-- 
+1.7.3.4
+

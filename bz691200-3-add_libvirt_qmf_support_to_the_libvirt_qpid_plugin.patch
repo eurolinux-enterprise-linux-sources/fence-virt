@@ -1,0 +1,88 @@
+From a2aff2aeb8815a8cf190623af3d54e39717f356c Mon Sep 17 00:00:00 2001
+From: Zane Bitter <zbitter@redhat.com>
+Date: Wed, 3 Aug 2011 17:54:44 +0200
+Subject: [PATCH] Add libvirt-qmf support to the libvirt-qpid plugin
+
+libvirt-qmf has replaced libvirt-qpid. It performs the same functions, but
+has a slightly different schema. It is also a matahari agent, so the
+default port to connect to is now matahari-brokerd's port, not qpidd's.
+---
+ server/libvirt-qpid.cpp |   27 ++++++++++++++++++++-------
+ 1 files changed, 20 insertions(+), 7 deletions(-)
+
+diff --git a/server/libvirt-qpid.cpp b/server/libvirt-qpid.cpp
+index 151bd2e..d133346 100644
+--- a/server/libvirt-qpid.cpp
++++ b/server/libvirt-qpid.cpp
+@@ -56,9 +56,6 @@ struct lq_info {
+ };
+ 
+ 
+-const std::string domainQuery("{class: domain, package: 'org.redhat.libvirt'}");
+-
+-
+ #define VALIDATE(arg) \
+ do {\
+ 	if (!arg || ((struct lq_info *)arg)->magic != MAGIC) { \
+@@ -95,7 +92,10 @@ lq_open_session(struct lq_info *info)
+ 		session = qmf::ConsoleSession(connection);
+ 
+ 		std::stringstream filter;
+-		filter << "[eq, _product, [quote, 'libvirt-qpid']]";
++		filter << "[or, "
++			   "[eq, _product, [quote, 'libvirt-qmf']], "
++			   "[eq, _product, [quote, 'libvirt-qpid']]"
++			  "]";
+ 		session.setAgentFilter(filter.str());
+ 		session.open();
+ 	}
+@@ -103,6 +103,19 @@ lq_open_session(struct lq_info *info)
+ 	return session;
+ }
+ 
++static qmf::ConsoleEvent
++queryDomain(qmf::Agent& agent)
++{
++	std::string query;
++	if (agent.getProduct() == "libvirt-qmf") {
++		query = "{class: Domain, package: 'org.libvirt'}";
++	} else {
++		query = "{class: domain, package: 'com.redhat.libvirt'}";
++	}
++
++	return agent.query(query);
++}
++
+ int
+ do_lq_request(struct lq_info *info, const char *vm_name,
+ 	      const char *action)
+@@ -132,7 +145,7 @@ do_lq_request(struct lq_info *info, const char *vm_name,
+ 		for (unsigned a = 0; !found && a < numAgents; a++) {
+ 			agent = session.getAgent(a);
+ 
+-			qmf::ConsoleEvent event(agent.query(domainQuery));
++			qmf::ConsoleEvent event(queryDomain(agent));
+ 			uint32_t numDomains = event.getDataCount();
+ 			for (unsigned d = 0; !found && d < numDomains; d++) {
+ 				domain = event.getData(d);
+@@ -318,7 +331,7 @@ lq_hostlist(hostlist_callback callback, void *arg, void *priv)
+ 		uint32_t numAgents = session.getAgentCount();
+ 		for (unsigned a = 0; a < numAgents; a++) {
+ 			qmf::Agent agent(session.getAgent(a));
+-			event = agent.query(domainQuery);
++			event = queryDomain(agent);
+ 
+ 			numDomains = event.getDataCount();
+ 			if (numDomains >= 1) {
+@@ -366,7 +379,7 @@ lq_init(backend_context_t *c, config_object_t *config)
+ 		return -1;
+ 
+ 	memset(info, 0, sizeof(*info));
+-	info->port = 5672;
++	info->port = 49000;
+ 
+ 	if(sc_get(config, "backends/libvirt-qpid/@host",
+ 		   value, sizeof(value))==0){
+-- 
+1.7.3.4
+

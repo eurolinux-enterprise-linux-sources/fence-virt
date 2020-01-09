@@ -1,0 +1,86 @@
+diff -ur a/client/main.c b/client/main.c
+--- a/client/main.c
++++ b/client/main.c
+@@ -56,10 +56,10 @@
+ 
+ 	args_init(&args);
+ 	if (!strcmp(basename(argv[0]), "fence_xvm")) {
+-       		my_options = "di:a:p:r:C:c:k:M:H:uo:t:?hV";
++       		my_options = "di:a:p:r:C:c:k:M:H:uo:t:?hVw:";
+ 		args.mode = MODE_MULTICAST;
+ 	} else {
+-       		my_options = "dD:P:A:p:M:H:o:t:?hV";
++       		my_options = "dD:P:A:p:M:H:o:t:?hVw:";
+ 		args.mode = MODE_SERIAL;
+ 	}
+ 
+@@ -115,6 +115,9 @@
+ 		return 0;
+ 	}
+ 
++	if (args.delay > 0)
++		sleep(args.delay);
++
+ 	switch(args.mode) {
+ 	case MODE_MULTICAST:
+ 		ret = mcast_fence_virt(&args);
+diff -ur a/client/options.c b/client/options.c
+--- a/client/options.c
++++ b/client/options.c
+@@ -276,6 +276,18 @@
+ 	}
+ }
+ 
++static inline void
++assign_delay(fence_virt_args_t *args, struct arg_info *arg, char *value)
++{
++	if (!value)
++		return;
++
++	args->delay = atoi(value);
++	if (args->timeout <= 0) {
++		printf("Invalid delay: '%s'\n", value);
++		args->flags |= F_ERR;
++	}
++}
+ 
+ static inline void
+ assign_help(fence_virt_args_t *args, struct arg_info *arg, char *value)
+@@ -447,6 +459,11 @@
+ 	  "URI for Hypervisor (default: auto detect)",
+ 	  assign_uri },
+ 	  
++	{ 'w', "-w <delay>", "delay",
++	  0, "string", "0",
++	  "Fencing delay (in seconds; default=0)",
++	  assign_delay },
++
+ 	{ 'V', "-V", NULL,
+ 	  0, "boolean", "0",
+  	  "Display version and exit", 
+diff -ur a/include/options.h b/include/options.h
+--- a/include/options.h
++++ b/include/options.h
+@@ -44,6 +44,7 @@
+ 	client_mode_t mode;
+ 	int debug;
+ 	int timeout;
++	int delay;
+ 	int retr_time;
+ 	arg_flags_t flags;
+ 
+diff -ur a/man/fence_virt.8 b/man/fence_virt.8
+--- a/man/fence_virt.8
++++ b/man/fence_virt.8
+@@ -44,6 +44,11 @@
+ . 
+ Fencing timeout (in seconds) (Default Value: 30)
+ 
++.TP
++.B -w
++. 
++Fencing delay (in seconds). The fence agent will wait the specified number of seconds before attempting a fencing operation. (Default Value: 0)
++
+ .SH MULTICAST PARAMETERS
+ These parameters are used only when using fence_virt in multicast mode
+ (e.g. by running fence_xvm).

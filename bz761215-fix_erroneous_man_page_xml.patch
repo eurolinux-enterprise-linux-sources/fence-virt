@@ -1,0 +1,28 @@
+From 93fa4c468d0cb36f338ed452c3b037a73d3e14fc Mon Sep 17 00:00:00 2001
+From: Lon Hohberger <lon@users.sourceforge.net>
+Date: Wed, 8 Feb 2012 12:13:39 -0500
+Subject: [PATCH] Fix erroneous man page XML
+
+Resolves: rhbz#761215
+
+Signed-off-by: Lon Hohberger <lon@users.sourceforge.net>
+---
+ man/fence_virt.conf.5 |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/man/fence_virt.conf.5 b/man/fence_virt.conf.5
+index 6873847..1a1ef6f 100644
+--- a/man/fence_virt.conf.5
++++ b/man/fence_virt.conf.5
+@@ -133,7 +133,7 @@ serial ports and channels are supported.  Example libvirt XML:
+   <\fBchannel\fP type='unix'>
+     <source mode='bind' path='/sandbox/guests/fence_molly_vmchannel'/>
+     <target type='guestfwd' address='10.0.2.179' port='1229'/>
+-  </serial>
++  </channel>
+ .in 0
+ 
+ .TP
+-- 
+1.7.7.6
+

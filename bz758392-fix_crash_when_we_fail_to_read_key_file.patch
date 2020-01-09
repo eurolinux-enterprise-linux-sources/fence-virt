@@ -1,0 +1,47 @@
+From 6f4008548ef00de8407f26109ae889a925205ca8 Mon Sep 17 00:00:00 2001
+From: Lon Hohberger <lon@users.sourceforge.net>
+Date: Wed, 8 Feb 2012 13:54:59 -0500
+Subject: [PATCH] Fix crash when we fail to read key file.
+
+If hashing is requested and we have no key data, immediately fail.
+
+Resolves: rhbz#758392
+
+Signed-off-by: Lon Hohberger <lon@users.sourceforge.net>
+---
+ common/simple_auth.c |    6 ++++++
+ server/mcast.c       |    1 +
+ 2 files changed, 7 insertions(+), 0 deletions(-)
+
+diff --git a/common/simple_auth.c b/common/simple_auth.c
+index b94e115..e0a5762 100644
+--- a/common/simple_auth.c
++++ b/common/simple_auth.c
+@@ -114,6 +114,12 @@ sha_verify(fence_req_t *req, void *key, size_t key_len)
+ 			return 0;
+ 	}
+ 
++	if (!key || !key_len) {
++		dbg_printf(3, "%s: Hashing requested when we have no key data\n",
++			   __FUNCTION__);
++		return 0;
++	}
++
+ 	memset(hash, 0, sizeof(hash));
+ 	h = HASH_Create(ht);
+ 	if (!h)
+diff --git a/server/mcast.c b/server/mcast.c
+index 6a5fa5a..a43271d 100644
+--- a/server/mcast.c
++++ b/server/mcast.c
+@@ -548,6 +548,7 @@ mcast_init(listener_context_t *c, const fence_callbacks_t *cb,
+ 			       "authentication\n", info->args.key_file);
+ 			info->args.auth = AUTH_NONE;
+ 			info->args.hash = HASH_NONE;
++			info->key_len = 0;
+ 		}
+ 	}
+ 
+-- 
+1.7.7.6
+

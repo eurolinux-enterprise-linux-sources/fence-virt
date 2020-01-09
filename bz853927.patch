@@ -1,0 +1,42 @@
+diff -ur a/server/checkpoint.c b/server/checkpoint.c
+--- a/server/checkpoint.c
++++ b/server/checkpoint.c
+@@ -390,7 +390,7 @@
+ 
+ 		if (vdp)
+ 			virDomainFree(vdp);
+-		return 0;
++		return 1;
+ 	}
+ 
+ 	syslog(LOG_NOTICE, "Destroying domain %s\n", vm_name);
+@@ -449,7 +449,7 @@
+ 			   "do - domain does not exist\n");
+ 		if (vdp)
+ 			virDomainFree(vdp);
+-		return 0;
++		return 1;
+ 	}
+ 
+ 	syslog(LOG_NOTICE, "Rebooting domain %s\n", vm_name);
+diff -ur a/server/libvirt.c b/server/libvirt.c
+--- a/server/libvirt.c
++++ b/server/libvirt.c
+@@ -176,7 +176,7 @@
+ 
+ 		if (vdp)
+ 			virDomainFree(vdp);
+-		return 0;
++		return 1;
+ 	}
+ 
+ 	syslog(LOG_NOTICE, "Destroying domain %s\n", vm_name);
+@@ -318,7 +318,7 @@
+ 			   "do - domain does not exist\n");
+ 		if (vdp)
+ 			virDomainFree(vdp);
+-		return 0;
++		return 1;
+ 	}
+ 
+ 	syslog(LOG_NOTICE, "Rebooting domain %s\n", vm_name);

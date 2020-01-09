@@ -1,0 +1,81 @@
+From 6009b9779da773b4b0fb7347653ea76ce1a0a417 Mon Sep 17 00:00:00 2001
+From: Lon Hohberger <lon@users.sourceforge.net>
+Date: Wed, 8 Feb 2012 15:44:42 -0500
+Subject: [PATCH] Catch exceptions for libvirt-qmf detection failures
+
+Fix default port.
+
+Resolves: rhbz#753974
+
+Signed-off-by: Lon Hohberger <lon@users.sourceforge.net>
+---
+ server/libvirt-qpid.cpp |   38 ++++++++++++++++++++++----------------
+ 1 files changed, 22 insertions(+), 16 deletions(-)
+
+diff --git a/server/libvirt-qpid.cpp b/server/libvirt-qpid.cpp
+index eb35d49..a6bf210 100644
+--- a/server/libvirt-qpid.cpp
++++ b/server/libvirt-qpid.cpp
+@@ -68,6 +68,7 @@ do {\
+ static qmf::ConsoleSession
+ lq_open_session(struct lq_info *info)
+ {
++	qmf::ConsoleSession session;
+ 	std::stringstream url;
+ 	url << info->host << ":" << info->port;
+ 
+@@ -82,22 +83,27 @@ lq_open_session(struct lq_info *info)
+ 		options["sasl-mechanism"] = "GSSAPI";
+ 	}
+ 
+-	qpid::messaging::Connection connection(url.str(), options);
+-	connection.open();
++	try {
++		qpid::messaging::Connection connection(url.str(), options);
++		connection.open();
++	
++		if (!connection.isOpen()) {
++			std::cout << "Error connecting." << std::endl;
++		} else {
++			session = qmf::ConsoleSession(connection);
++
++			std::stringstream filter;
++			filter << "[or, "
++			   	"[eq, _product, [quote, 'libvirt-qmf']], "
++			   	"[eq, _product, [quote, 'libvirt-qpid']]"
++			  	"]";
++			session.setAgentFilter(filter.str());
++			session.open();
++		}
++	}
+ 
+-	qmf::ConsoleSession session;
+-	if (!connection.isOpen()) {
+-		std::cout << "Error connecting." << std::endl;
+-	} else {
+-		session = qmf::ConsoleSession(connection);
+-
+-		std::stringstream filter;
+-		filter << "[or, "
+-			   "[eq, _product, [quote, 'libvirt-qmf']], "
+-			   "[eq, _product, [quote, 'libvirt-qpid']]"
+-			  "]";
+-		session.setAgentFilter(filter.str());
+-		session.open();
++	catch (qpid::messaging::TransportFailure ex) {
++		std::cout << "Error establishing session: " << ex.what() << std::endl;
+ 	}
+ 
+ 	return session;
+@@ -379,7 +385,7 @@ lq_init(backend_context_t *c, config_object_t *config)
+ 		return -1;
+ 
+ 	memset(info, 0, sizeof(*info));
+-	info->port = 49000;
++	info->port = 5672; /* Actually match default qpid port */
+ 
+ 	if(sc_get(config, "backends/libvirt-qpid/@host",
+ 		   value, sizeof(value))==0){
+-- 
+1.7.7.6
+

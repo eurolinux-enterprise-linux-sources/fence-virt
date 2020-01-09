@@ -1,0 +1,23 @@
+commit 96ff88d44f69869528d24ad4d37c41fc6ca95057
+Author: Lon Hohberger <lhh@redhat.com>
+Date:   Wed Jul 25 11:10:54 2012 -0400
+
+    Improve fence_virt.conf man page description of 'hash'
+    
+    Signed-off-by: Lon Hohberger <lhh@redhat.com>
+    Acked-by: Ryan McCabe <rmccabe@redhat.com>
+    Acked-by: Jaroslav Kortus <jkortus@redhat.com>
+
+diff --git a/man/fence_virt.conf.5 b/man/fence_virt.conf.5
+index c9e8243..364233c 100644
+--- a/man/fence_virt.conf.5
++++ b/man/fence_virt.conf.5
+@@ -83,7 +83,7 @@ the shared key file to use (default: /etc/cluster/fence_xvm.key).
+ .TP
+ .B hash
+ .
+-the hashing algorithm to use for packet signing (default: sha256, but could
++the weakest hashing algorithm allowed for client requests.  Clients may send packets with stronger hashes than the one specified, but not weaker ones.  (default: sha256, but could
+ be sha1, sha512, or none)
+ 
+ .TP

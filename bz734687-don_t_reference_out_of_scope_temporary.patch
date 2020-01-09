@@ -1,0 +1,54 @@
+From b5e1bc6e5f73d8607dc30ecf5ddb4bbf8e8c4178 Mon Sep 17 00:00:00 2001
+From: Zane Bitter <zbitter@redhat.com>
+Date: Wed, 24 Aug 2011 18:40:42 +0200
+Subject: [PATCH] Don't reference out-of-scope temporary
+
+The string on which we were calling c_str() was a temporary, so the C
+string returned would no longer be valid. This issue was detected by a
+Coverity scan.
+
+Resolves: rhbz#734687
+
+Signed-off-by: Zane Bitter <zbitter@redhat.com>
+Reviewed-by: Lon Hohberger <lon@users.sourceforge.net>
+---
+ server/libvirt-qpid.cpp |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/server/libvirt-qpid.cpp b/server/libvirt-qpid.cpp
+index d133346..eb35d49 100644
+--- a/server/libvirt-qpid.cpp
++++ b/server/libvirt-qpid.cpp
+@@ -120,7 +120,7 @@ int
+ do_lq_request(struct lq_info *info, const char *vm_name,
+ 	      const char *action)
+ {
+-	const char *vm_state = NULL;
++	std::string vm_state;
+ 	const char *property = "name";
+ 	if (is_uuid(vm_name) == 1) {
+ 		property = "uuid";
+@@ -171,15 +171,15 @@ do_lq_request(struct lq_info *info, const char *vm_name,
+ 		goto out;
+ 	}
+ 
+-	vm_state = domain.getProperty("state").asString().c_str();
++	vm_state = domain.getProperty("state").asString();
+ 
+ 	std::cout << vm_name << " " << vm_state << std::endl;
+ 
+ 	int r;
+-	if (!strcmp( vm_state, "running" ) ||
+-	    !strcmp( vm_state, "idle" ) ||
+-	    !strcmp( vm_state, "paused" ) ||
+-	    !strcmp( vm_state, "no state" ) ) {
++	if (vm_state == "running" ||
++	    vm_state == "idle" ||
++	    vm_state == "paused" ||
++	    vm_state == "no state") {
+ 		r = RESP_OFF;
+ 	} else {
+ 		r = 0;
+-- 
+1.7.3.4
+

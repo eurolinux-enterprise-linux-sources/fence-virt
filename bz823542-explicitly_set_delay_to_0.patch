@@ -1,0 +1,28 @@
+From 0c502aad7743ade8a6c2eeec780f36f61d312f4c Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Wed, 17 Oct 2012 12:54:55 -0400
+Subject: [PATCH] fence-virt: Explicitly set delay to 0
+
+Explicitly set the delay argument to 0 when initializing the args
+struct.
+
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ client/options.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/client/options.c b/client/options.c
+index cd975ae..40c6587 100644
+--- a/client/options.c
++++ b/client/options.c
+@@ -590,6 +590,7 @@ args_init(fence_virt_args_t *args)
+ 	args->retr_time = 20;
+ 	args->flags = 0;
+ 	args->debug = 0;
++	args->delay = 0;
+ }
+ 
+ 
+-- 
+1.7.11.7
+

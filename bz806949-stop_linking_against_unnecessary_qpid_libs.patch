@@ -1,0 +1,29 @@
+From 13d3806fa617ceee38d25da30738b9ea218effbf Mon Sep 17 00:00:00 2001
+From: Lon Hohberger <lon@users.sourceforge.net>
+Date: Mon, 26 Mar 2012 17:12:49 -0400
+Subject: [PATCH] Stop linking against unnecessary QPid libs.
+
+Resolves: rhbz#806949
+
+Signed-off-by: Lon Hohberger <lon@users.sourceforge.net>
+---
+ server/Makefile.in |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/server/Makefile.in b/server/Makefile.in
+index bf5ebba..13ec338 100644
+--- a/server/Makefile.in
++++ b/server/Makefile.in
+@@ -24,7 +24,8 @@ AIS_LIBS=-L/usr/lib64/openais -lSaCkpt
+ COROSYNC_LIBS=-L/usr/lib64/corosync -lcpg
+ CMAN_LIBS=-lcman
+ VIRT_LIBS=-lvirt
+-VIRT_QPID=-lqmf2 -lqpidclient -lqpidtypes -lqpidcommon -lqpidmessaging
++VIRT_QPID=-lqmf2
++# No longer needed: -lqpidclient -lqpidtypes -lqpidcommon -lqpidmessaging
+ NSS_LIBS=-lnss3
+ XML_LIBS=`xml2-config --libs`
+ INCLUDES=-I../include `nss-config --cflags` `nspr-config --cflags` `xml2-config --cflags`
+-- 
+1.7.7.6
+

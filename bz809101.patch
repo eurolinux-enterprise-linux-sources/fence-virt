@@ -1,0 +1,33 @@
+diff -ur a/man/fence_virt.conf.5 b/man/fence_virt.conf.5
+--- a/man/fence_virt.conf.5	2012-04-11 12:02:14.504554622 -0400
++++ b/man/fence_virt.conf.5	2012-04-11 12:14:18.264346179 -0400
+@@ -109,9 +109,9 @@
+ .TP
+ .B interface
+ .
+-interface to listen on.  By default, fence_virtd listens on all interfaces.
+-However, this causes problems in some environments where the host computer
+-is used as a gateway.
++interface to listen on.  By default, fence_virtd listens on the default
++network interface.  However, this causes problems in some environments
++where the host computer is used as a gateway.
+ 
+ .SS serial
+ 
+diff -ur a/server/config.c b/server/config.c
+--- a/server/config.c	2010-01-14 16:44:36.000000000 -0500
++++ b/server/config.c	2012-04-11 12:13:08.847368409 -0400
+@@ -250,9 +250,10 @@
+ 
+ 	/* MULTICAST INTERFACE */
+ 	printf("\nSetting a preferred interface causes fence_virtd to listen only\n"
+-	       "on that interface.  Normally, it listens on all interfaces.\n"
+-	       "In environments where the virtual machines are using the host\n"
+-	       "machine as a gateway, this *must* be set (typically to virbr0).\n"
++	       "on that interface.  Normally, it listens on the default network\n"
++	       "interface.  In environments where the virtual machines are\n"
++	       "using the host machine as a gateway, this *must* be set\n"
++	       "(typically to virbr0).\n"
+ 	       "Set to 'none' for no interface.\n\n"
+ 	      );
+ 
