@@ -1,6 +1,6 @@
 Name:		fence-virt
 Version:	0.3.2
-Release:	2%{?dist}
+Release:	5%{?dist}
 Summary:	A pluggable fencing framework for virtual machines
 Group:		System Environment/Base
 License:	GPLv2+
@@ -13,6 +13,12 @@ URL:		http://fence-virt.sourceforge.net
 Source0:	http://people.redhat.com/rmccabe/fence-virt/%{name}-%{version}.tar.bz2
 
 Patch0: bz1207422-client_do_not_truncate_vm_domains_in_list_output.patch
+Patch1: bz1078197-fix_broken_restrictions_on_the_port_ranges.patch
+Patch2: bz1204873-fix_delay_parameter_checking_copy_paste.patch
+Patch3: bz1204877-remove_delay_from_the_status,_monitor_and_list.patch
+Patch4: bz1334170-allow_fence_virtd_to_run_as_non_root.patch
+Patch5: bz1334170-2-fix_use_of_undefined_#define.patch
+Patch6: bz1291522-Install_firewalld_unit_file.patch
 
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -21,7 +27,7 @@ BuildRequires:	automake autoconf libxml2-devel nss-devel nspr-devel
 BuildRequires:	flex bison libuuid-devel
 
 BuildRequires: systemd-units
-Requires(post):	systemd-sysv systemd-units
+Requires(post):	systemd-sysv systemd-units firewalld-filesystem
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 
@@ -61,6 +67,13 @@ Requires:	fence-virtd
 %description -n fence-virtd-serial
 Provides serial VMChannel listener capability for fence-virtd.
 
+%package -n fence-virtd-tcp
+Summary:	Tcp listener for fence-virtd
+Group:	System Environment/Base
+Requires:	fence-virtd
+
+%description -n fence-virtd-tcp
+Provides TCP listener capability for fence-virtd.
 
 %package -n fence-virtd-libvirt
 Summary:	Libvirt backend for fence-virtd
@@ -78,10 +91,16 @@ machines on a desktop.
 %setup -q
 
 %patch0 -p1 -b .bz1207422
+%patch1 -p1 -b .bz1078197.1
+%patch2 -p1 -b .bz1204873.1
+%patch3 -p1 -b .bz1204877.1
+%patch4 -p1 -b .bz1334170.1
+%patch5 -p1 -b .bz1334170.2
+%patch6 -p1 -b .bz1291522.1
 
 %build
 ./autogen.sh
-%{configure} --disable-libvirt-qmf-plugin
+%{configure} --disable-libvirt-qmf-plugin --enable-tcp-plugin
 make %{?_smp_mflags}
 
 
@@ -92,6 +111,10 @@ make install DESTDIR=%{buildroot}
 # Systemd unit file
 mkdir -p %{buildroot}/%{_unitdir}/
 install -m 0644 fence_virtd.service %{buildroot}/%{_unitdir}/
+
+# firewalld service file
+mkdir -p %{buildroot}/%{_prefix}/lib/firewalld/services/
+install -m 0644 fence_virt.xml %{buildroot}/%{_prefix}/lib/firewalld/services/
 
 %clean
 rm -rf %{buildroot}
@@ -143,6 +166,7 @@ fi
 %defattr(-,root,root,-)
 %{_sbindir}/fence_virtd
 %{_unitdir}/fence_virtd.service
+%{_prefix}/lib/firewalld/services/fence_virt.xml
 %config(noreplace) %{_sysconfdir}/fence_virt.conf
 %dir %{_libdir}/%{name}
 %{_mandir}/man5/fence_virt.conf.*
@@ -156,11 +180,34 @@ fi
 %defattr(-,root,root,-)
 %{_libdir}/%{name}/serial.so
 
+%files -n fence-virtd-tcp
+%defattr(-,root,root,-)
+%{_libdir}/%{name}/tcp.so
+
 %files -n fence-virtd-libvirt
 %defattr(-,root,root,-)
 %{_libdir}/%{name}/libvirt.so
 
 %changelog
+* Tue Jun 28 2016 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-5
+- fence-virt: Add firewalld service file.
+  Resolves: rhbz#1291522
+
+* Mon Jun 27 2016 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-4
+- fence-virt: Enable the TCP listener plugin
+  Resolves: rhbz#1334170
+- Allow fence_virtd to run as non-root
+  Fix use of undefined define
+  Resolves: rhbz#1334170
+
+* Mon Jun 27 2016 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-3
+- fence-virt: Fix broken restrictions on the port ranges
+  Resolves: rhbz#1214301
+- client: Fix "delay" parameter checking
+  Resolves: rhbz#1204877
+- Remove delay from the status, monitor and list
+  Resolves: rhbz#1204877
+
 * Fri Jul 17 2015 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-2
 - Do not truncate VM domains in the output of the list command.
   Resolves: rhbz#1207422
