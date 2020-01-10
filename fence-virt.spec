@@ -1,31 +1,18 @@
 Name:		fence-virt
 Version:	0.3.2
-Release:	14%{?dist}
+Release:	2%{?dist}
 Summary:	A pluggable fencing framework for virtual machines
 Group:		System Environment/Base
 License:	GPLv2+
 
 %if 0%{?rhel}
-ExclusiveArch: i686 x86_64 ppc64le
+ExclusiveArch: i686 x86_64
 %endif
 
 URL:		http://fence-virt.sourceforge.net
 Source0:	http://people.redhat.com/rmccabe/fence-virt/%{name}-%{version}.tar.bz2
 
 Patch0: bz1207422-client_do_not_truncate_vm_domains_in_list_output.patch
-Patch1: bz1078197-fix_broken_restrictions_on_the_port_ranges.patch
-Patch2: bz1204873-fix_delay_parameter_checking_copy_paste.patch
-Patch3: bz1204877-remove_delay_from_the_status,_monitor_and_list.patch
-Patch4: bz1334170-allow_fence_virtd_to_run_as_non_root.patch
-Patch5: bz1334170-2-fix_use_of_undefined_#define.patch
-Patch6: bz1291522-Install_firewalld_unit_file.patch
-Patch7: bz1393958-cleanup_numeric_argument_parsing.patch
-Patch8: bz1411910-fence_virtd_drop_legacy_sysvstartpriority_from_service.patch
-Patch9: bz1334170-cleanup_documentation_of_the_tcp_listener.patch
-Patch10: bz1092531-enable_hardening.patch
-Patch11: bz1447700-virt_add_support_for_the_validate_all_status.patch
-Patch12: bz1384181-make_the_libvirt_backend_survive_libvirtd.patch
-Patch13: bz1600566-fence_virt-dont-report-success-incorrect-parameter.patch
 
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -34,7 +21,7 @@ BuildRequires:	automake autoconf libxml2-devel nss-devel nspr-devel
 BuildRequires:	flex bison libuuid-devel
 
 BuildRequires: systemd-units
-Requires(post):	systemd-sysv systemd-units firewalld-filesystem
+Requires(post):	systemd-sysv systemd-units
 Requires(preun):	systemd-units
 Requires(postun):	systemd-units
 
@@ -44,7 +31,6 @@ Conflicts:	fence-agents < 3.0.5-2
 %description
 Fencing agent for virtual machines.
 
-%global _hardened_build 1
 
 %package -n fence-virtd
 Summary:	Daemon which handles requests from fence-virt
@@ -75,13 +61,6 @@ Requires:	fence-virtd
 %description -n fence-virtd-serial
 Provides serial VMChannel listener capability for fence-virtd.
 
-%package -n fence-virtd-tcp
-Summary:	Tcp listener for fence-virtd
-Group:	System Environment/Base
-Requires:	fence-virtd
-
-%description -n fence-virtd-tcp
-Provides TCP listener capability for fence-virtd.
 
 %package -n fence-virtd-libvirt
 Summary:	Libvirt backend for fence-virtd
@@ -99,34 +78,10 @@ machines on a desktop.
 %setup -q
 
 %patch0 -p1 -b .bz1207422
-%patch1 -p1 -b .bz1078197.1
-%patch2 -p1 -b .bz1204873.1
-%patch3 -p1 -b .bz1204877.1
-%patch4 -p1 -b .bz1334170.1
-%patch5 -p1 -b .bz1334170.2
-%patch6 -p1 -b .bz1291522.1
-%patch7 -p1 -b .bz1393958.1
-%patch8 -p1 -b .bz1411910.1
-%patch9 -p1 -b .bz1334170.1
-%patch10 -p1 -b .bz1092531.1
-%patch11 -p1 -b .bz1447700.1
-%patch12 -p1 -b .bz1384181.1
-%patch13 -p1 -F1
 
 %build
-%ifarch s390 s390x sparcv9 sparc64
-export PIECFLAGS="-fPIE"
-%else
-export PIECFLAGS="-fpie"
-%endif
-
-export RELRO="-Wl,-z,relro,-z,now"
-export CFLAGS="$RPM_OPT_FLAGS $CPPFLAGS $PIECFLAGS $RELRO"
-export CXXFLAGS="$RPM_OPT_FLAGS $CPPFLAGS $PIECFLAGS $RELRO"
-export LDFLAGS="$LDFLAGS -pie"
-
 ./autogen.sh
-%{configure} --disable-libvirt-qmf-plugin --enable-tcp-plugin
+%{configure} --disable-libvirt-qmf-plugin
 make %{?_smp_mflags}
 
 
@@ -137,10 +92,6 @@ make install DESTDIR=%{buildroot}
 # Systemd unit file
 mkdir -p %{buildroot}/%{_unitdir}/
 install -m 0644 fence_virtd.service %{buildroot}/%{_unitdir}/
-
-# firewalld service file
-mkdir -p %{buildroot}/%{_prefix}/lib/firewalld/services/
-install -m 0644 fence_virt.xml %{buildroot}/%{_prefix}/lib/firewalld/services/
 
 %clean
 rm -rf %{buildroot}
@@ -192,7 +143,6 @@ fi
 %defattr(-,root,root,-)
 %{_sbindir}/fence_virtd
 %{_unitdir}/fence_virtd.service
-%{_prefix}/lib/firewalld/services/fence_virt.xml
 %config(noreplace) %{_sysconfdir}/fence_virt.conf
 %dir %{_libdir}/%{name}
 %{_mandir}/man5/fence_virt.conf.*
@@ -206,72 +156,11 @@ fi
 %defattr(-,root,root,-)
 %{_libdir}/%{name}/serial.so
 
-%files -n fence-virtd-tcp
-%defattr(-,root,root,-)
-%{_libdir}/%{name}/tcp.so
-
 %files -n fence-virtd-libvirt
 %defattr(-,root,root,-)
 %{_libdir}/%{name}/libvirt.so
 
 %changelog
-* Tue Jan 22 2019 Oyvind Albrigtsen <oalbrigt@redhat.com> - 0.3.2-14
-- fence_xvm/fence_virt: dont report success incorrect parameter
-  Resolves: rhbz#1600566
-
-* Wed Aug 09 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-13
-- fence_virtd: Make the libvirt backend survive libvirtd restarts
-  Resolves: rhbz#1384181
-- fence_xvm/fence_virt: Add support for the validate-all status
-  Resolves: rhbz#1447700
-
-* Wed Jun 14 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-12
-- fence-virt: Rebuild to restore debuginfo
-  Resolves: rhbz#1092531
-
-* Mon May 22 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-11
-- fence-virt: Enable PIE and full RELRO
-  Resolves: rhbz#1092531
-
-* Mon May 22 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-10
-- fence-virt: Enable PIE and RELRO
-  Resolves: rhbz#1092531
-
-* Wed May 17 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-9
-- fence-virtd: Cleanup documentation of the TCP listener
-  Resolves: rhbz#1334170
-
-* Wed Mar 15 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-8
-- fence-virt: Build for ppc64le
-  Resolves: rhbz#1402572
-
-* Mon Mar 13 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-7
-- fence_virtd: drop legacy SysVStartPriority from service
-  Resolves: rhbz#1411910
-
-* Mon Mar 13 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-6
-- fence-virt: Cleanup numeric argument parsing
-  Resolves: rhbz#1393958
-
-* Tue Jun 28 2016 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-5
-- fence-virt: Add firewalld service file.
-  Resolves: rhbz#1291522
-
-* Mon Jun 27 2016 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-4
-- fence-virt: Enable the TCP listener plugin
-  Resolves: rhbz#1334170
-- Allow fence_virtd to run as non-root
-  Fix use of undefined define
-  Resolves: rhbz#1334170
-
-* Mon Jun 27 2016 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-3
-- fence-virt: Fix broken restrictions on the port ranges
-  Resolves: rhbz#1214301
-- client: Fix "delay" parameter checking
-  Resolves: rhbz#1204877
-- Remove delay from the status, monitor and list
-  Resolves: rhbz#1204877
-
 * Fri Jul 17 2015 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-2
 - Do not truncate VM domains in the output of the list command.
   Resolves: rhbz#1207422
