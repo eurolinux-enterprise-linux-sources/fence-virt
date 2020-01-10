@@ -1,0 +1,29 @@
+From f1f1a2437c5b0811269b5859a5ef646f44105a88 Mon Sep 17 00:00:00 2001
+From: Oyvind Albrigtsen <oalbrigt@redhat.com>
+Date: Tue, 3 May 2016 15:58:00 +0200
+Subject: [PATCH] Remove delay from the status, monitor and list
+ functions
+
+---
+ client/main.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/client/main.c b/client/main.c
+index 7be4a8e..dd064dc 100644
+--- a/client/main.c
++++ b/client/main.c
+@@ -119,7 +119,10 @@ main(int argc, char **argv)
+ 		return 0;
+ 	}
+ 
+-	if (args.delay > 0)
++	if (args.delay > 0 &&
++	    args.op != FENCE_STATUS &&
++	    args.op != FENCE_DEVSTATUS &&
++	    args.op != FENCE_HOSTLIST)
+ 		sleep(args.delay);
+ 
+ 	switch(args.mode) {
+-- 
+2.5.5
+

@@ -1,0 +1,17 @@
+CC=@CC@
+CXX=@CXX@
+
+CFLAGS=@CFLAGS@
+CFLAGS+=-fPIC -Wall -Wstrict-prototypes -Wshadow -D_GNU_SOURCE
+
+LEX=@LEX@
+YACC=@YACC@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+sysconfdir=@sysconfdir@
+sbindir=@sbindir@
+libdir=@libdir@
+mandir=@mandir@
+
+PACKAGE_NAME=@PACKAGE_NAME@

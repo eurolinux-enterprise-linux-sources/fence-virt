@@ -1,0 +1,31 @@
+From 4a749e3f7de4c82446634a1b57d3877b7dc46223 Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Fri, 17 Jul 2015 10:52:01 -0400
+Subject: [PATCH] fence-virt: client: Do not truncate VM domains in list output
+
+Don't truncate the domain string for VMs when listing their status
+in the output of the list command.
+
+Resolves: rhbz#1207422
+
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ client/mcast.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/client/mcast.c b/client/mcast.c
+index a247e8c..f2654bd 100644
+--- a/client/mcast.c
++++ b/client/mcast.c
+@@ -117,7 +117,7 @@ do_read_hostlist(int fd, int timeout)
+ 		    strlen((char *)hinfo.domain) == 0)
+ 			break;
+ 
+-		printf("%-20.20s %s %s\n", hinfo.domain, hinfo.uuid,
++		printf("%-32s %s %s\n", hinfo.domain, hinfo.uuid,
+ 		       (hinfo.state == 1) ? "on" : "off");
+ 
+ 	} while (1);
+-- 
+2.4.3
+

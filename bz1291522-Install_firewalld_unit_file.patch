@@ -1,0 +1,11 @@
+diff -urN a/fence_virt.xml b/fence_virt.xml
+--- a/fence_virt.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/fence_virt.xml	2016-06-28 13:27:39.351692601 -0400
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<service>
++  <short>fence_virt</short>
++  <description>fence_virt is an I/O fencing agent that can be used to fence virtual machines.</description>
++  <port protocol="tcp" port="1229"/>
++  <port protocol="udp" port="1229"/>
++</service>

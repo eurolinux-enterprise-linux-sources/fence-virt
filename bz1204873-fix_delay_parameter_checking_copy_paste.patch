@@ -1,0 +1,31 @@
+From f49a7d68d5fecf781bae55056f2e7d02bddd47d7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jan=20Pokorn=C3=BD?= <jpokorny@redhat.com>
+Date: Mon, 23 Mar 2015 17:14:25 +0100
+Subject: [PATCH] client: fix "delay" parameter checking (copy-paste)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Resolves: rhbz#1204873
+
+Signed-off-by: Jan Pokorný <jpokorny@redhat.com>
+---
+ client/options.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/client/options.c b/client/options.c
+index a44c15f..a20e09f 100644
+--- a/client/options.c
++++ b/client/options.c
+@@ -336,7 +336,7 @@ assign_delay(fence_virt_args_t *args, struct arg_info *arg, char *value)
+ 		return;
+ 
+ 	args->delay = atoi(value);
+-	if (args->timeout <= 0) {
++	if (args->delay <= 0) {
+ 		printf("Invalid delay: '%s'\n", value);
+ 		args->flags |= F_ERR;
+ 	}
+-- 
+2.5.5
+

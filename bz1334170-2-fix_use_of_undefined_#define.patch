@@ -1,0 +1,25 @@
+From 87b4eb3d8c9046b66beeae424d0f9d2b4c4d9eee Mon Sep 17 00:00:00 2001
+From: Andrew Beekhof <andrew@beekhof.net>
+Date: Mon, 9 May 2016 14:54:10 +1000
+Subject: [PATCH] Fix use of undefined #define
+
+---
+ server/tcp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/server/tcp.c b/server/tcp.c
+index 6c93f14..a6186c6 100644
+--- a/server/tcp.c
++++ b/server/tcp.c
+@@ -417,7 +417,7 @@ tcp_config(config_object_t *config, tcp_options *args)
+ 		return -1;
+ 	}
+ 
+-	args->port = DEFAULT_TCP_PORT;
++	args->port = DEFAULT_MCAST_PORT;
+ 	if (sc_get(config, "listeners/tcp/@port",
+ 		   value, sizeof(value)-1) == 0) {
+ 		dbg_printf(1, "Got %s for port\n", value);
+-- 
+2.5.5
+

@@ -1,0 +1,31 @@
+###############################################################################
+###############################################################################
+##
+##  Copyright (C) 2009 Red Hat, Inc.
+##  
+##  This copyrighted material is made available to anyone wishing to use,
+##  modify, copy, or redistribute it subject to the terms and conditions
+##  of the GNU General Public License v.2.
+##
+###############################################################################
+###############################################################################
+
+include ../Makefile.top
+
+MAN8=fence_virt.8 fence_xvm.8 fence_virtd.8
+MAN5=fence_virt.conf.5
+
+all: $(MAN5) $(MAN8)
+
+install: all
+	if [ ! -d ${DESTDIR}/${mandir}/man8 ]; then \
+		install -d ${DESTDIR}/${mandir}/man8 ; \
+	fi
+	install -m644 ${MAN8} ${DESTDIR}/${mandir}/man8
+	if [ ! -d ${DESTDIR}/${mandir}/man5 ]; then \
+		install -d ${DESTDIR}/${mandir}/man5 ; \
+	fi
+	install -m644 ${MAN5} ${DESTDIR}/${mandir}/man5
+
+
+clean:

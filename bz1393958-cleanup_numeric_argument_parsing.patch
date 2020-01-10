@@ -1,0 +1,118 @@
+diff -ur a/client/options.c b/client/options.c
+--- a/client/options.c	2017-03-13 17:48:52.083747432 -0400
++++ b/client/options.c	2017-03-13 17:50:37.289128784 -0400
+@@ -130,14 +130,18 @@
+ static inline void
+ assign_port(fence_virt_args_t *args, struct arg_info *arg, char *value)
+ {
++	char *p;
++	int ret;
++
+ 	if (!value)
+ 		return;
+ 
+-	args->net.port = atoi(value);
+-	if (args->net.port <= 0 || args->net.port >= 65536) {
++	ret = strtol(value, &p, 0);
++	if (ret <= 0 || ret >= 65536 || *p != '\0') {
+ 		printf("Invalid port: '%s'\n", value);
+ 		args->flags |= F_ERR;
+-	}
++	} else
++		args->net.port = ret;
+ }
+ 
+ 
+@@ -154,14 +158,18 @@
+ static inline void
+ assign_retrans(fence_virt_args_t *args, struct arg_info *arg, char *value)
+ {
++	char *p;
++	int ret;
++
+ 	if (!value)
+ 		return;
+ 
+-	args->retr_time = atoi(value);
+-	if (args->retr_time <= 0) {
++	ret = strtol(value, &p, 0);
++	if (ret <= 0 || *p != '\0') {
+ 		printf("Invalid retransmit time: '%s'\n", value);
+ 		args->flags |= F_ERR;
+-	}
++	} else
++		args->retr_time = ret;
+ }
+ 
+ static inline void
+@@ -319,27 +327,35 @@
+ static inline void
+ assign_timeout(fence_virt_args_t *args, struct arg_info *arg, char *value)
+ {
++	char *p;
++	int ret;
++
+ 	if (!value)
+ 		return;
+ 
+-	args->timeout = atoi(value);
+-	if (args->timeout <= 0) {
++	ret = strtol(value, &p, 0);
++	if (ret <= 0 || *p != '\0') {
+ 		printf("Invalid timeout: '%s'\n", value);
+ 		args->flags |= F_ERR;
+-	}
++	} else
++		args->timeout = ret;
+ }
+ 
+ static inline void
+ assign_delay(fence_virt_args_t *args, struct arg_info *arg, char *value)
+ {
++	char *p;
++	int ret;
++
+ 	if (!value)
+ 		return;
+ 
+-	args->delay = atoi(value);
+-	if (args->delay <= 0) {
++	ret = strtol(value, &p, 0);
++	if (ret < 0 || *p != '\0') {
+ 		printf("Invalid delay: '%s'\n", value);
+ 		args->flags |= F_ERR;
+-	}
++	} else
++		args->delay = ret;
+ }
+ 
+ static inline void
+diff -ur a/server/config.c b/server/config.c
+--- a/server/config.c	2017-03-13 17:48:52.081747462 -0400
++++ b/server/config.c	2017-03-13 17:49:08.526494450 -0400
+@@ -237,9 +237,10 @@
+ 
+ 	do {
+ 		text_input("Multicast IP Port", val, inp, sizeof(inp));
++		char *p;
+ 
+-		done = atoi(inp);
+-		if (done <= 0 || done >= 65536) {
++		done = strtol(inp, &p, 0);
++		if (*p != '\0' || done <= 0 || done >= 65536) {
+ 			printf("Port value '%s' is out of range\n", val);
+ 			continue;
+ 		}
+@@ -374,9 +375,10 @@
+ 
+ 	do {
+ 		text_input("TCP Listen Port", val, inp, sizeof(inp));
++		char *p;
+ 
+-		done = atoi(inp);
+-		if (done <= 0 || done != (done & 0xffff)) {
++		done = strtol(inp, &p, 0);
++		if (*p != '\0' || done <= 0 || done >= 65536) {
+ 			printf("Port value '%s' is out of range\n", val);
+ 			continue;
+ 		}
