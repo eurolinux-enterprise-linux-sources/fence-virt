@@ -1,0 +1,35 @@
+From 83e507cd236c304ce6b95b2ba52d3894f8002dc8 Mon Sep 17 00:00:00 2001
+From: Oyvind Albrigtsen <oalbrigt@redhat.com>
+Date: Fri, 9 Nov 2018 13:10:29 +0100
+Subject: [PATCH] fence_virt: dont report success for incorrect parameters
+
+---
+ client/main.c    | 2 +-
+ client/options.c | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/client/main.c b/client/main.c
+index 8e94093..a3135e3 100644
+--- a/client/main.c
++++ b/client/main.c
+@@ -112,7 +112,7 @@ main(int argc, char **argv)
+ 		args.mode = MODE_VSOCK;
+ 
+ 	if (args.flags & F_ERR) {
+-        if (args.op != FENCE_VALIDATEALL)
++		if (args.op != FENCE_VALIDATEALL)
+ 			args_usage(argv[0], my_options, (argc == 1));
+ 		exit(1);
+ 	}
+diff --git a/client/options.c b/client/options.c
+index a3f321b..4b5ed56 100644
+--- a/client/options.c
++++ b/client/options.c
+@@ -904,6 +904,7 @@ args_get_stdin(const char *optstr, fence_virt_args_t *args)
+ 				"parse warning: "
+ 				"illegal variable '%s' on line %d\n", name,
+ 				line);
++			args->flags |= F_ERR;
+ 			continue;
+ 		}
+ 

@@ -1,6 +1,6 @@
 Name:		fence-virt
 Version:	0.3.2
-Release:	13%{?dist}
+Release:	14%{?dist}
 Summary:	A pluggable fencing framework for virtual machines
 Group:		System Environment/Base
 License:	GPLv2+
@@ -25,6 +25,7 @@ Patch9: bz1334170-cleanup_documentation_of_the_tcp_listener.patch
 Patch10: bz1092531-enable_hardening.patch
 Patch11: bz1447700-virt_add_support_for_the_validate_all_status.patch
 Patch12: bz1384181-make_the_libvirt_backend_survive_libvirtd.patch
+Patch13: bz1600566-fence_virt-dont-report-success-incorrect-parameter.patch
 
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -110,6 +111,7 @@ machines on a desktop.
 %patch10 -p1 -b .bz1092531.1
 %patch11 -p1 -b .bz1447700.1
 %patch12 -p1 -b .bz1384181.1
+%patch13 -p1 -F1
 
 %build
 %ifarch s390 s390x sparcv9 sparc64
@@ -213,6 +215,10 @@ fi
 %{_libdir}/%{name}/libvirt.so
 
 %changelog
+* Tue Jan 22 2019 Oyvind Albrigtsen <oalbrigt@redhat.com> - 0.3.2-14
+- fence_xvm/fence_virt: dont report success incorrect parameter
+  Resolves: rhbz#1600566
+
 * Wed Aug 09 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-13
 - fence_virtd: Make the libvirt backend survive libvirtd restarts
   Resolves: rhbz#1384181
