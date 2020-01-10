@@ -1,6 +1,6 @@
 Name:		fence-virt
 Version:	0.3.2
-Release:	12%{?dist}
+Release:	13%{?dist}
 Summary:	A pluggable fencing framework for virtual machines
 Group:		System Environment/Base
 License:	GPLv2+
@@ -23,6 +23,8 @@ Patch7: bz1393958-cleanup_numeric_argument_parsing.patch
 Patch8: bz1411910-fence_virtd_drop_legacy_sysvstartpriority_from_service.patch
 Patch9: bz1334170-cleanup_documentation_of_the_tcp_listener.patch
 Patch10: bz1092531-enable_hardening.patch
+Patch11: bz1447700-virt_add_support_for_the_validate_all_status.patch
+Patch12: bz1384181-make_the_libvirt_backend_survive_libvirtd.patch
 
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -106,6 +108,8 @@ machines on a desktop.
 %patch8 -p1 -b .bz1411910.1
 %patch9 -p1 -b .bz1334170.1
 %patch10 -p1 -b .bz1092531.1
+%patch11 -p1 -b .bz1447700.1
+%patch12 -p1 -b .bz1384181.1
 
 %build
 %ifarch s390 s390x sparcv9 sparc64
@@ -209,6 +213,12 @@ fi
 %{_libdir}/%{name}/libvirt.so
 
 %changelog
+* Wed Aug 09 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-13
+- fence_virtd: Make the libvirt backend survive libvirtd restarts
+  Resolves: rhbz#1384181
+- fence_xvm/fence_virt: Add support for the validate-all status
+  Resolves: rhbz#1447700
+
 * Wed Jun 14 2017 Ryan McCabe <rmccabe@redhat.com> - 0.3.2-12
 - fence-virt: Rebuild to restore debuginfo
   Resolves: rhbz#1092531
